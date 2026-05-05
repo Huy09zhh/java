@@ -27,8 +27,10 @@ public class User {
 
     @Column(columnDefinition = "NVARCHAR(255)")
     private String fullName;
+
     private String phone;
 
-    @Column(name = "role_id")
-    private Long roleId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
+    private Role role;
 }
