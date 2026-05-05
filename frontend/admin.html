@@ -91,6 +91,13 @@
             display: block;
         }
 
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
         .card {
             background: white;
             padding: 25px;
@@ -159,7 +166,32 @@
         <div id="policies" class="section"></div>
         
         <div id="sysadmin" class="section">
-            <div class="card" style="margin-top: 20px;">
+            <div class="grid">
+                <div class="card">
+                    <h2>Cấu Hình Thanh Toán (ACB API)</h2>
+                    <div style="margin-top: 15px;">
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label style="display: block; font-size: 0.9rem; margin-bottom: 5px;">Số Tài Khoản Nhận
+                                Tiền</label>
+                            <input type="text" id="configAcbAccount" value="23128301"
+                                style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label style="display: block; font-size: 0.9rem; margin-bottom: 5px;">Trạng Thái Polling
+                                API</label>
+                            <select id="configAcbStatus"
+                                style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                                <option value="ACTIVE">Bật (Active)</option>
+                                <option value="MAINTENANCE">Bảo trì (Maintenance)</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="saveSysConfig()" style="background: #0f172a; width: 100%;">Lưu Cấu
+                            Hình</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="grid-column: 1 / -1; margin-top: 20px;">
                 <h2>Nhật Ký Thao Tác Hệ Thống (Audit Logs)</h2>
                 <div style="max-height: 400px; overflow-y: auto; margin-top: 15px;">
                     <table style="font-size: 0.9rem;">
@@ -200,8 +232,9 @@
             };
             document.getElementById('pageTitle').innerText = titles[tabId] || 'Admin';
 
-            if (tabId === 'sysadmin' && typeof loadAuditLogs === 'function') {
-                loadAuditLogs();
+            if (tabId === 'sysadmin') {
+                if (typeof loadAuditLogs === 'function') loadAuditLogs();
+                if (typeof loadSystemConfigs === 'function') loadSystemConfigs();
             }
         }
 
