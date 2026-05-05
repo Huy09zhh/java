@@ -90,6 +90,42 @@
         .section.active {
             display: block;
         }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        table {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            border-collapse: collapse;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        th,
+        td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
     </style>
 </head>
 
@@ -121,7 +157,28 @@
         <div id="users" class="section"></div>
         <div id="manager" class="section"></div>
         <div id="policies" class="section"></div>
-        <div id="sysadmin" class="section"></div>
+        
+        <div id="sysadmin" class="section">
+            <div class="card" style="margin-top: 20px;">
+                <h2>Nhật Ký Thao Tác Hệ Thống (Audit Logs)</h2>
+                <div style="max-height: 400px; overflow-y: auto; margin-top: 15px;">
+                    <table style="font-size: 0.9rem;">
+                        <thead>
+                            <tr>
+                                <th>Thời Gian</th>
+                                <th>Tài Khoản</th>
+                                <th>Hành Động</th>
+                                <th>Module</th>
+                                <th>ID Đối Tượng</th>
+                                <th>Chi Tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditLogTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -142,6 +199,10 @@
                 'policies': 'Quản lý Chính sách', 'sysadmin': 'System Admin'
             };
             document.getElementById('pageTitle').innerText = titles[tabId] || 'Admin';
+
+            if (tabId === 'sysadmin' && typeof loadAuditLogs === 'function') {
+                loadAuditLogs();
+            }
         }
 
         function logout() {
@@ -149,6 +210,7 @@
             window.location.href = 'index.html';
         }
     </script>
+    <script src="js/sysadmin.js"></script>
 </body>
 
 </html>
