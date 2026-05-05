@@ -33,7 +33,6 @@ async function loadOrders() {
         });
         
         if (!res.ok) {
-            console.error("Lỗi tải đơn hàng:", res.status, res.statusText);
             if (res.status === 401) {
                 alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
                 localStorage.removeItem('jwt_token');
@@ -45,7 +44,6 @@ async function loadOrders() {
         }
 
         allOrdersData = await res.json();
-        console.log("Sales: Loaded", allOrdersData.length, "orders from API");
 
         if (typeof updateDashboardStats === "function") updateDashboardStats(allOrdersData);
 
@@ -53,7 +51,7 @@ async function loadOrders() {
         renderSalesTable(sortedOrders);
 
         if (typeof renderOpsTable === "function") renderOpsTable(allOrdersData);
-    } catch (e) { console.error("Lỗi tải đơn hàng:", e); }
+    } catch (e) { }
 }
 
 function renderSalesTable(orders) {
@@ -205,18 +203,15 @@ function updateDashboardStats(orders) {
 
     orders.forEach(o => {
         const amount = Number(o.totalAmount || 0);
-        if (o.status === 'DELIVERED' || o.status === 'COMPLETED') {
+        
+        if (o.status === 'DELIVERED') {
             revenue += amount;
-        } else if (o.status === 'REFUNDED') {
-            revenue -= amount;
         }
 
         if (o.status === 'PENDING' || o.status === 'PRESCRIPTION_REVIEW') {
             pendingCount++;
         }
     });
-
-    console.log("Dashboard Update: Total Orders =", orders.length, "Calculated Revenue =", revenue);
 
     document.getElementById('totalOrders').innerText = orders.length;
     document.getElementById('totalRevenue').innerText = revenue.toLocaleString('vi-VN') + 'đ';
@@ -250,7 +245,7 @@ async function callApi(url, method, body = null, contentType = 'application/json
 
         const res = await fetch(url, options);
         return res.ok;
-    } catch (e) { console.error("Lỗi API:", e); return false; }
+    } catch (e) { return false; }
 }
 
 function filterDashboard(type, btn) {
