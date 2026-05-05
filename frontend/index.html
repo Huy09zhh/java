@@ -4,167 +4,549 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TBEE Eyewear - Cửa Hàng Kính Mắt</title>
+    <title>TBEE Eyewear | Premium Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-    <header class="site-header">
-        <div class="container">
-            <div class="brand">TBEE <span>Eyewear</span></div>
-            <nav class="site-nav" style="display: flex; align-items: center; gap: 24px;">
-                <a href="#">Trang chủ</a>
-                <a href="#">Kính Mát</a>
-                <a href="#">Gọng Kính</a>
-                <a href="#">Tròng Kính</a>
-                <a href="#">Liên hệ</a>
-                <div class="nav-controls" style="display: flex; align-items: center; gap: 15px;">
-                    <button class="nav-btn" id="accountBtn" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0;">👤</button>
-                    <button onclick="toggleCartModal()" style="position: relative; background: transparent; border: none; cursor: pointer; font-size: 1.1rem; font-weight: 600;">
-                        🛒 Giỏ hàng
-                        <span id="cart-badge" style="display: none; position: absolute; top: -10px; right: -15px; background: #e63946; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.75rem; font-weight: bold;">0</span>
-                    </button>
-                    <button onclick="loadUserOrders()" style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                        📦 Đơn hàng của tôi
-                    </button>
-                </div>
-            </nav>
-        </div>
-    </header>
 
-    <main class="page-content">
-        <div class="container">
-            <div class="section-header">
-                <h1 class="section-title">Danh Sách Kính Mắt</h1>
+
+<!-- Navbar -->
+<nav class="glass">
+    <div class="logo">TBEE<span>Eyewear</span></div>
+    <div class="nav-links"
+         style="display: flex; gap: 20px; font-weight: bold; font-size: 0.9rem; text-transform: uppercase;">
+        <a href="#" data-filter="ALL" class="nav-filter active" style="color: #38bdf8; text-decoration: none;">Trang
+            Chủ</a>
+
+        <div class="dropdown">
+            <a href="#" data-filter="LENS" class="nav-filter"
+               style="color: var(--text-muted); text-decoration: none;">Tròng kính</a>
+            <div class="dropdown-content">
+                <a href="#" class="sub-filter" data-parent="LENS" data-subfilter="lens_photochromic">Đổi màu</a>
+                <a href="#" class="sub-filter" data-parent="LENS" data-subfilter="lens_blue_light">Lọc ánh sáng
+                    xanh</a>
+                <a href="#" class="sub-filter" data-parent="LENS" data-subfilter="lens_index">Chiết suất</a>
+                <a href="#" class="sub-filter" data-parent="LENS" data-subfilter="lens_myope_control">Kiểm soát cận
+                    thị</a>
             </div>
+        </div>
 
-            <div class="product-grid" id="product-grid">
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="placeholder-glass.jpg" alt="Kính Mẫu">
+        <div class="dropdown">
+            <a href="#" data-filter="FRAME" class="nav-filter"
+               style="color: var(--text-muted); text-decoration: none;">Gọng kính</a>
+            <div class="dropdown-content">
+                <a href="#" class="sub-filter" data-parent="FRAME" data-subfilter="frame_unisex">Gọng người lớn</a>
+                <a href="#" class="sub-filter" data-parent="FRAME" data-subfilter="frame_kid">Gọng trẻ em</a>
+                <a href="#" class="sub-filter" data-parent="FRAME" data-subfilter="frame_square">Kiểu dáng vuông</a>
+                <a href="#" class="sub-filter" data-parent="FRAME" data-subfilter="frame_round">Kiểu dáng tròn</a>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <a href="#" data-filter="SUNGLASSES" class="nav-filter"
+               style="color: var(--text-muted); text-decoration: none;">Kính mát</a>
+            <div class="dropdown-content">
+                <a href="#" class="sub-filter" data-parent="SUNGLASSES" data-subfilter="sun_polarized">Phân cực
+                    (Polarized)</a>
+                <a href="#" class="sub-filter" data-parent="SUNGLASSES" data-subfilter="sun_square">Kiểu dáng
+                    vuông</a>
+                <a href="#" class="sub-filter" data-parent="SUNGLASSES" data-subfilter="sun_cat_eye">Kiểu mắt
+                    mèo</a>
+                <a href="#" class="sub-filter" data-parent="SUNGLASSES" data-subfilter="sun_polygon">Kiểu đa
+                    giác</a>
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <a href="#" data-filter="CONTACT_LENS" class="nav-filter"
+               style="color: var(--text-muted); text-decoration: none;">Contact lens</a>
+            <div class="dropdown-content">
+                <a href="#" class="sub-filter" data-parent="CONTACT_LENS" data-subfilter="contact_clear">Kính áp
+                    tròng trắng</a>
+                <a href="#" class="sub-filter" data-parent="CONTACT_LENS" data-subfilter="contact_accessory">Phụ
+                    kiện & Nước ngâm</a>
+            </div>
+        </div>
+
+    </div>
+    <div class="nav-controls" style="display: flex; align-items: center; gap: 15px;">
+        <!-- Search bar with icon -->
+        <div
+                style="position: relative; display: flex; align-items: center; background: rgba(255,255,255,0.1); border-radius: 20px; padding: 5px 15px;">
+            <input type="text" id="searchInput" placeholder="tìm kiếm"
+                   style="background: transparent; border: none; color: #111827; outline: none; width: 120px;">
+            <span style="cursor: pointer; font-size: 1.2rem;">🔍</span>
+        </div>
+
+        <!-- Avatar / Account -->
+        <button class="nav-btn" id="accountBtn"
+                style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0;">👤</button>
+        <!-- Unified User Dropdown -->
+        <div id="userInfo" style="display: none; align-items: center; gap: 10px;">
+            <div class="dropdown">
+                    <span id="userNameDisplay"
+                          style="font-size: 0.9rem; font-weight: 500; cursor: pointer; color: var(--accent);"></span>
+                <div class="dropdown-content" style="min-width: 180px;">
+                    <a href="#" onclick="openProfile()">👤 Thông tin cá nhân</a>
+                    <a href="#" onclick="openModal('historyModal'); loadOrderHistory()">📦 Lịch sử đơn hàng</a>
+                    <a href="#" onclick="openModal('returnModal'); loadOrdersForReturn()">🔄 Đổi/Trả/Bảo hành</a>
+                    <hr style="border: 0.5px solid rgba(255,255,255,0.1); margin: 5px 0;">
+                    <a href="#" onclick="logout()" style="color: #ef4444;">🚪 Đăng xuất</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Return/Exchange/Warranty Modal -->
+        <div class="modal-overlay" id="returnModal">
+            <div class="modal-content glass" style="max-width: 500px;">
+                <span class="close-btn" onclick="closeModal('returnModal')">&times;</span>
+                <h2 style="text-align: center; margin-bottom: 20px;">Yêu Cầu Đổi / Trả / Bảo Hành</h2>
+                <form id="returnForm">
+                    <div class="form-group">
+                        <label>Loại yêu cầu</label>
+                        <select id="returnType" required
+                                style="width: 100%; padding: 10px; border-radius: 8px; background: #ffffff; color: #111827; border: 1px solid #e2e8f0;">
+                            <option value="ĐỔI HÀNG">Yêu cầu Đổi hàng</option>
+                            <option value="TRẢ HÀNG">Yêu cầu Trả hàng</option>
+                            <option value="BẢO HÀNH">Yêu cầu Bảo hành</option>
+                        </select>
                     </div>
-                    <div class="product-info">
-                        <h3 class="product-name">Kính Mát Bolon BX8005</h3>
-                        <p class="product-price">3.180.000 đ</p>
-                        <button class="btn-add-cart">Thêm Vào Giỏ</button>
+                    <div class="form-group">
+                        <label>Chọn đơn hàng</label>
+                        <select id="returnOrderSelect" required
+                                style="width: 100%; padding: 10px; border-radius: 8px; background: #ffffff; color: #111827; border: 1px solid #e2e8f0;">
+                            <option value="">-- Đang tải đơn hàng... --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Mô tả chi tiết lý do / Lỗi sản phẩm</label>
+                        <textarea id="returnReason" required
+                                  style="width: 100%; height: 100px; padding: 10px; border-radius: 8px; background: #ffffff; color: #111827; border: 1px solid #e2e8f0;"></textarea>
+                    </div>
+                    <div id="returnMessage"
+                         style="color: #10b981; font-size: 0.9rem; text-align: center; margin-bottom: 10px;"></div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">GỬI YÊU
+                        CẦU</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Cart (Only for customer) -->
+        <button class="nav-btn" id="cartBtn"
+                style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; padding: 0; display: none; position: relative;">
+            🛒
+            <span class="cart-badge" id="cartBadge"
+                  style="position: absolute; top: -5px; right: -10px; background: #10b981; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem;">0</span>
+        </button>
+
+        <a href="admin.html" class="nav-btn"
+           style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; border-left: 1px solid var(--glass-border); padding-left: 15px; display: none;"
+           id="adminLink">Admin</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+    <h1>Tầm Nhìn Vượt Trội</h1>
+    <p>Khám phá bộ sưu tập kính mát và gọng kính cao cấp. Đặt cắt tròng theo độ chính xác tuyệt đối.</p>
+</header>
+
+<section class="category-quick">
+    <div class="category-tile glass" data-filter="LENS">
+        <div class="category-title">Tròng kính</div>
+        <div class="category-subtitle">Đổi màu · Chống xanh · Đa tròng</div>
+    </div>
+    <div class="category-tile glass" data-filter="FRAME">
+        <div class="category-title">Gọng kính</div>
+        <div class="category-subtitle">Nam · Nữ · Trẻ em</div>
+    </div>
+    <div class="category-tile glass" data-filter="SUNGLASSES">
+        <div class="category-title">Kính mát</div>
+        <div class="category-subtitle">Polarized · Thời trang</div>
+    </div>
+    <div class="category-tile glass" data-filter="CONTACT_LENS">
+        <div class="category-title">Contact lens</div>
+        <div class="category-subtitle">1 ngày · 3 tháng · Phụ kiện</div>
+    </div>
+</section>
+
+
+
+
+
+<!-- Product Grid -->
+<main class="products" id="productGrid">
+    <!-- Products generated by JS -->
+</main>
+
+<section class="service-highlights">
+    <div class="highlight-card">Miễn phí vận chuyển đơn từ 1.000.000đ</div>
+    <div class="highlight-card">Đổi trả trong 7 ngày nếu lỗi sản xuất</div>
+    <div class="highlight-card">Bảo hành chính hãng toàn hệ thống</div>
+</section>
+
+<!-- Modals -->
+<!-- 1. Login/Register Modal -->
+<div class="modal-overlay" id="loginModal">
+    <div class="modal-content glass">
+        <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
+        <h2 id="authTitle" style="margin-bottom: 20px;">Đăng Nhập</h2>
+        <form id="loginForm">
+            <div class="form-group" id="fullNameGroup" style="display: none;">
+                <label>Họ và Tên</label>
+                <input type="text" id="fullName">
+            </div>
+            <div class="form-group" id="emailGroup" style="display: none;">
+                <label>Email</label>
+                <input type="email" id="email">
+            </div>
+            <div class="form-group">
+                <label>Tên đăng nhập</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="form-group">
+                <label>Mật khẩu</label>
+                <input type="password" id="password" required>
+            </div>
+            <p id="loginError" style="color: var(--danger); margin-bottom: 15px; font-size: 0.9rem;"></p>
+            <button type="submit" class="btn btn-primary" id="authSubmitBtn">Đăng Nhập</button>
+            <p style="margin-top: 15px; text-align: center; font-size: 0.9rem;">
+                <a href="#" id="toggleAuthMode" style="color: var(--accent);">Chưa có tài khoản? Đăng ký ngay</a>
+            </p>
+        </form>
+    </div>
+</div>
+
+<!-- Profile Modal -->
+<div class="modal-overlay" id="profileModal">
+    <div class="modal-content glass" style="max-width: 500px;">
+        <span class="close-btn" onclick="closeModal('profileModal')">&times;</span>
+        <h2 style="margin-bottom: 20px; text-align: center;">Thông Tin Cá Nhân</h2>
+        <form id="profileForm">
+            <div class="form-group">
+                <label>Họ và Tên</label>
+                <input type="text" id="profileFullName" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="profileEmail" required>
+            </div>
+            <div class="form-group">
+                <label>Tên đăng nhập</label>
+                <input type="text" id="profileUsername" disabled
+                       style="background: rgba(255,255,255,0.05); cursor: not-allowed;">
+            </div>
+            <div class="form-group">
+                <label>Mật khẩu mới (Để trống nếu không đổi)</label>
+                <input type="password" id="profilePassword" placeholder="********">
+            </div>
+            <div id="profileMessage"
+                 style="color: #10b981; font-size: 0.9rem; text-align: center; margin-bottom: 10px;"></div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">CẬP NHẬT THÔNG
+                TIN</button>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="productModal">
+    <div class="modal-content glass" style="max-width: 900px;">
+        <span class="close-btn" onclick="closeModal('productModal')">&times;</span>
+
+        <div class="product-detail-container">
+            <div class="product-detail-left">
+                <img id="modalProductImage" src="" alt="Product Image">
+            </div>
+            <div class="product-detail-right">
+                <div class="product-type" id="modalProductType" style="margin-bottom: 5px;">THƯƠNG HIỆU: KÍNH</div>
+                <h2 id="modalProductName" style="margin-bottom: 10px; font-size: 1.8rem;">Tên sản phẩm</h2>
+                <p id="modalProductPrice"
+                   style="color: var(--accent); font-size: 1.5rem; font-weight: bold; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    0đ</p>
+
+                <p id="modalProductDesc" class="product-detail-desc">Mô tả sản phẩm...</p>
+
+                <div id="prescriptionSection"
+                     style="display: none; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);">
+                    <h4 style="margin-bottom: 15px; color: #cbd5e1; font-size: 0.9rem; text-transform: uppercase;">
+                        Tùy chọn cắt tròng (Prescription)</h4>
+                    <div style="display: flex; gap: 15px;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label>Độ Cận Mắt Trái</label>
+                            <input type="number" step="0.25" value="0" id="leftEye">
+                        </div>
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label>Độ Cận Mắt Phải</label>
+                            <input type="number" step="0.25" value="0" id="rightEye">
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </main>
 
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 TBEE Eyewear. Bảo lưu mọi quyền.</p>
-        </div>
-    </footer>
-
-    <div class="modal-overlay" id="loginModal">
-        <div class="modal-content glass">
-            <span class="close-btn" id="closeLoginBtn">&times;</span>
-            <h2 id="authTitle" style="margin-bottom: 20px;">Đăng Nhập</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label>Tên đăng nhập</label>
-                    <input type="text" id="username" required>
-                </div>
-                <div class="form-group">
-                    <label>Mật khẩu</label>
-                    <input type="password" id="password" required>
-                </div>
-                <p id="loginError" style="color: var(--danger); margin-bottom: 15px; font-size: 0.9rem;"></p>
-                <button type="submit" class="btn btn-primary" id="authSubmitBtn">Đăng Nhập</button>
-            </form>
-        </div>
-    </div>
-    <div id="cartModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: flex-end;">
-        <div style="background: white; width: 100%; max-width: 400px; height: 100%; padding: 20px; display: flex; flex-direction: column; box-shadow: -5px 0 15px rgba(0,0,0,0.1); animation: slideIn 0.3s ease-out;">
-
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 15px;">
-                <h2 style="font-size: 1.5rem; color: #1e293b; margin: 0;">Giỏ hàng của bạn</h2>
-                <button onclick="toggleCartModal()" style="background: none; border: none; font-size: 1.8rem; color: #64748b; cursor: pointer;">&times;</button>
-            </div>
-
-            <div id="cartItemsContainer" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
-            </div>
-
-            <div style="border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: auto;">
-                <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; color: #1e293b;">
-                    <span>Tổng tiền:</span>
-                    <span id="cartTotalPrice" style="color: #e63946;">0 đ</span>
-                </div>
-                <button onclick="goToCheckout()" style="width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: 600;">
-                    Tiến hành Thanh toán
-                </button>
-            </div>
-
-        </div>
-    </div>
-
-    <div id="cartModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: flex-end;">
-        <div style="background: white; width: 100%; max-width: 400px; height: 100%; padding: 20px; display: flex; flex-direction: column; box-shadow: -5px 0 15px rgba(0,0,0,0.1);">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 15px;">
-                <h2 style="font-size: 1.5rem; color: #1e293b; margin: 0;">Giỏ hàng của bạn</h2>
-                <button onclick="toggleCartModal()" style="background: none; border: none; font-size: 1.8rem; color: #64748b; cursor: pointer;">&times;</button>
-            </div>
-            <div id="cartItemsContainer" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;"></div>
-            <div style="border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: auto;">
-                <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; color: #1e293b;">
-                    <span>Tổng tiền:</span>
-                    <span id="cartTotalPrice" style="color: #e63946;">0 đ</span>
-                </div>
-                <button onclick="goToCheckout()" style="width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: 600;">
-                    Tiến hành Thanh toán
-                </button>
+                <button class="btn btn-primary" id="confirmAddCartBtn"
+                        style="padding: 15px; font-size: 1.1rem; margin-top: auto;">THÊM VÀO GIỎ HÀNG</button>
             </div>
         </div>
     </div>
+</div>
 
-    <div id="orderHistoryModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-        <div style="background: white; width: 90%; max-width: 800px; max-height: 80vh; padding: 20px; border-radius: 8px; overflow-y: auto;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                <h2 style="margin: 0; color: #1e293b;">Lịch sử đơn hàng</h2>
-                <button onclick="document.getElementById('orderHistoryModal').style.display='none'" style="font-size: 1.5rem; background: none; border: none; cursor: pointer;">&times;</button>
+<!-- 3. Cart Modal -->
+<div class="modal-overlay" id="cartModal">
+    <div class="modal-content glass" style="max-width: 550px;">
+        <span class="close-btn" onclick="closeModal('cartModal')">&times;</span>
+        <h2 id="cartModalTitle" style="margin-bottom: 20px;">Giỏ Hàng (0)</h2>
+
+        <div id="cartItemsList" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+            <!-- JS Inject -->
+        </div>
+
+        <div class="cart-total-section">
+            <div class="cart-total-row">
+                <span class="cart-total-label">Tổng cộng:</span>
+                <span class="cart-total-value" id="cartTotalAmount">0đ</span>
             </div>
+
+            <button class="btn btn-primary" id="checkoutBtn" style="padding: 15px;">TIẾN HÀNH THANH TOÁN</button>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Payment Modal -->
+<div class="modal-overlay" id="paymentModal">
+    <div class="modal-content glass" style="max-width: 450px;">
+        <span class="close-btn" onclick="closeModal('paymentModal')">&times;</span>
+        <h2 style="text-align: center; margin-bottom: 20px;">Thanh Toán ACB</h2>
+
+        <div class="qr-box">
+            <img id="qrImage" src="" alt="QR">
+            <div class="qr-amount" id="payAmount">0đ</div>
+            <div class="qr-code">Nội dung: <b id="payContent">...</b></div>
+        </div>
+
+        <div class="status-badge status-pending" id="paymentStatus">
+            🔄 Đang chờ thanh toán...
+        </div>
+    </div>
+</div>
+
+<!-- 5. Order History Modal -->
+<div class="modal-overlay" id="historyModal">
+    <div class="modal-content glass" style="max-width: 700px;">
+        <span class="close-btn" onclick="closeModal('historyModal')">&times;</span>
+        <h2>Lịch Sử Đơn Hàng</h2>
+        <div style="margin-top: 20px; max-height: 400px; overflow-y: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left;">
                 <thead>
-                <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0; color: #475569;">
-                    <th style="padding: 12px 10px;">Mã ĐH</th>
-                    <th style="padding: 12px 10px;">Ngày đặt</th>
-                    <th style="padding: 12px 10px;">Tổng tiền</th>
-                    <th style="padding: 12px 10px;">Trạng thái</th>
-                    <th style="padding: 12px 10px;">Thao tác</th>
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <th style="padding: 10px;">Mã Đơn</th>
+                    <th style="padding: 10px;">Loại</th>
+                    <th style="padding: 10px;">Tổng Tiền</th>
+                    <th style="padding: 10px;">Trạng Thái</th>
+                    <th style="padding: 10px;">Thao Tác</th>
                 </tr>
                 </thead>
-                <tbody id="userOrderHistoryTable"></tbody>
+                <tbody id="historyTableBody">
+                <!-- JS Inject -->
+                </tbody>
             </table>
         </div>
     </div>
+</div>
 
-    <div id="customerOrderDetailModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; align-items: center; justify-content: center;">
-        <div style="background: white; width: 90%; max-width: 500px; padding: 25px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
-                <h3 style="margin: 0; color: #1e293b;">Chi tiết đơn hàng #<span id="detailOrderId"></span></h3>
-                <button onclick="document.getElementById('customerOrderDetailModal').style.display='none'" style="font-size: 1.5rem; background: none; border: none; cursor: pointer;">&times;</button>
+<!-- 6. Shipping Info Modal -->
+<div class="modal-overlay" id="shippingModal">
+    <div class="modal-content glass" style="max-width: 600px;">
+        <span class="close-btn" onclick="closeModal('shippingModal')">&times;</span>
+        <h3 style="margin-bottom: 5px; font-size: 1.4rem;">Thông Tin Giao Hàng</h3>
+        <p style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 20px;">Vui lòng nhập chính xác thông tin để
+            chúng tôi giao hàng nhanh chóng.</p>
+
+        <form id="shippingForm">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>LOẠI ĐƠN HÀNG</label>
+                    <select id="shipOrderType" style="background: white; color: #1e293b; border: 1px solid #cbd5e1;"
+                            onchange="togglePrescriptionFields()">
+                        <option value="AVAILABLE">Có sẵn (Giao ngay)</option>
+                        <option value="PRE_ORDER">Pre-order (Chờ nhập hàng)</option>
+                        <option value="PRESCRIPTION">Kính + Cắt tròng (Gia công)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>GIỚI TÍNH</label>
+                    <select id="shipGender" style="background: white; color: #1e293b; border: 1px solid #cbd5e1;">
+                        <option value="NAM">Nam</option>
+                        <option value="NU">Nữ</option>
+                        <option value="KHAC">Khác</option>
+                    </select>
+                </div>
             </div>
-            <div id="detailOrderItems" style="margin-bottom: 20px; max-height: 300px; overflow-y: auto;"></div>
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #e2e8f0; padding-top: 15px;">
-                <h4 style="margin: 0; color: #1e293b; font-size: 1.2rem;">Tổng cộng: <span id="detailOrderTotal" style="color: #e63946;"></span></h4>
-                <button onclick="document.getElementById('customerOrderDetailModal').style.display='none'" style="padding: 8px 20px; background: #64748b; color: white; border: none; border-radius: 4px; cursor: pointer;">Đóng</button>
+
+            <!-- Ô nhập độ kính sẽ hiện ra khi cần -->
+            <div id="prescriptionFields"
+                 style="display: none; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; background: rgba(0,0,0,0.05); padding: 15px; border-radius: 8px;">
+
+                <!-- Mắt Trái -->
+                <div
+                        style="grid-column: span 2; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-bottom: 5px; font-weight: bold; font-size: 0.8rem; color: #64748b;">
+                    THÔNG SỐ MẮT TRÁI (L)</div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>ĐỘ CẬN (SPH)</label>
+                    <input type="number" step="0.25" id="leftSph" value="0.00"
+                           style="background: white; color: #1e293b; border: 1px solid #cbd5e1;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>ĐỘ TRỤ (CYL)</label>
+                    <input type="number" step="0.25" id="leftCyl" value="0.00"
+                           style="background: white; color: #1e293b; border: 1px solid #cbd5e1;">
+                </div>
+                <div class="form-group" style="grid-column: span 2; margin-bottom: 10px;">
+                    <label>TRỤC (AXIS)</label>
+                    <input type="number" min="0" max="180" id="leftAxis" value="0"
+                           style="background: white; color: #1e293b; border: 1px solid #cbd5e1;">
+                </div>
+
+                <!-- Mắt Phải -->
+                <div
+                        style="grid-column: span 2; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-bottom: 5px; font-weight: bold; font-size: 0.8rem; color: #64748b;">
+                    THÔNG SỐ MẮT PHẢI (R)</div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>ĐỘ CẬN (SPH)</label>
+                    <input type="number" step="0.25" id="rightSph" value="0.00"
+                           style="background: white; color: #1e293b; border: 1px solid #cbd5e1;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>ĐỘ TRỤ (CYL)</label>
+                    <input type="number" step="0.25" id="rightCyl" value="0.00"
+                           style="background: white; color: #1e293b; border: 1px solid #cbd5e1;">
+                </div>
+                <div class="form-group" style="grid-column: span 2; margin-bottom: 10px;">
+                    <label>TRỤC (AXIS)</label>
+                    <input type="number" min="0" max="180" id="rightAxis" value="0"
+                           style="background: white; color: #1e293b; border: 1px solid #cbd5e1;">
+                </div>
+
+                <!-- PD -->
+                <div class="form-group" style="grid-column: span 2; margin-bottom: 0;">
+                    <label>KHOẢNG CÁCH ĐỒNG TỬ (PD) (55mm - 75mm)</label>
+                    <input type="number" min="55" max="75" id="pdValue" value="60"
+                           style="background: white; color: #1e293b; border: 1px solid #cbd5e1;">
+                </div>
             </div>
+
+            <div class="form-group">
+                <label>HỌ VÀ TÊN</label>
+                <input type="text" id="shipName" placeholder="Nguyễn Văn A" required
+                       style="background: white; color: #1e293b; border: 1px solid #cbd5e1;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>SỐ ĐIỆN THOẠI</label>
+                    <input type="tel" id="shipPhone" placeholder="0909 xxx xxx" required
+                           style="background: white; color: #1e293b; border: 1px solid #cbd5e1;">
+                </div>
+                <div class="form-group">
+                    <label>EMAIL</label>
+                    <input type="email" id="shipEmail" placeholder="email@domain.com"
+                           style="background: white; color: #1e293b; border: 1px solid #cbd5e1;">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>ĐỊA CHỈ LIÊN HỆ</label>
+                <textarea id="shipAddress" rows="2"
+                          placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..." required
+                          style="width: 100%; background: white; border: 1px solid #cbd5e1; border-radius: 8px; color: #1e293b; padding: 10px;"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>GHI CHÚ CHO ĐƠN HÀNG</label>
+                <textarea id="shipNote" rows="2" placeholder="Ví dụ: giao giờ hành chính, gọi trước khi giao..."
+                          style="width: 100%; background: white; border: 1px solid #cbd5e1; border-radius: 8px; color: #1e293b; padding: 10px;"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>HÌNH THỨC THANH TOÁN</label>
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                    <label class="payment-radio"
+                           style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                        <input type="radio" name="payMethod" value="ONLINE" checked>
+                        <div>
+                            <div style="font-weight: bold; font-size: 0.9rem;">CHUYỂN KHOẢN NGÂN HÀNG</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">THANH TOÁN NHANH QUA ACB.</div>
+                        </div>
+                    </label>
+                    <label class="payment-radio"
+                           style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                        <input type="radio" name="payMethod" value="COD">
+                        <div>
+                            <div style="font-weight: bold; font-size: 0.9rem;">THANH TOÁN KHI NHẬN HÀNG (COD)</div>
+                            <div style="font-size: 0.8rem; color: #94a3b8;">GIAO HÀNG VÀ THU TIỀN TẬN NƠI.</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 15px;">XÁC
+                NHẬN ĐẶT HÀNG</button>
+        </form>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-container">
+        <div class="footer-column footer-about">
+            <div class="logo">TBEE<span>Eyewear</span></div>
+            <p>Chúng tôi cung cấp giải pháp thị lực toàn diện với các dòng tròng kính chính hãng từ Pháp, Đức, Nhật
+                và gọng kính thời trang cao cấp.</p>
+        </div>
+
+        <div class="footer-column footer-links">
+            <h3>Sản Phẩm</h3>
+            <ul>
+                <li><a href="#" data-filter="LENS" class="nav-filter">Tròng kính</a></li>
+                <li><a href="#" data-filter="FRAME" class="nav-filter">Gọng kính</a></li>
+                <li><a href="#" data-filter="SUNGLASSES" class="nav-filter">Kính mát</a></li>
+                <li><a href="#" data-filter="CONTACT_LENS" class="nav-filter">Contact lens</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-column footer-links">
+            <h3>CHÍNH SÁCH & QUY ĐỊNH</h3>
+            <ul id="footerPolicyList">
+                <li><a href="policies.html?tab=huong-dan-do-mat">Hướng dẫn đo mắt</a></li>
+                <li><a href="policies.html?tab=chinh-sach-doi-tra">Chính sách đổi trả</a></li>
+                <li><a href="policies.html?tab=chinh-sach-bao-hanh">Chính sách bảo hành</a></li>
+                <li><a href="policies.html?tab=van-chuyen-thanh-toan">Vận chuyển & Thanh toán</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-column footer-contact">
+            <h3>Liên Hệ</h3>
+            <p><span class="icon">📍</span> 70 Đ. Tô Ký, Trung Mỹ Tây, Hồ Chí Minh, Việt Nam</p>
+            <p><span class="icon">📞</span> Hotline: 02838992862 (8:00 - 20:00)</p>
+            <p><span class="icon">✉️</span> Email: contact@tbee-eyewear.com</p>
         </div>
     </div>
 
-    <style>
-        @keyframes slideIn {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-        }
-    </style>
+    <div class="footer-bottom">
+        <div class="copyright">
+            © 2026 TBEE Eyewear. Tất cả quyền được bảo lưu.
+        </div>
+        <div class="payment-methods">
+            <span>Chấp nhận thanh toán:</span>
+            <span style="font-weight: bold; color: #fff;">ACB</span>
+            <span style="font-weight: bold; color: #fff;">VISA</span>
+            <span style="font-weight: bold; color: #fff;">COD</span>
+        </div>
+    </div>
+</footer>
 
-    <script src="js/app.js"></script>
-    <script src="js/auth.js"></script>
-
+<script src="js/app.js"></script>
 </body>
 
 </html>
