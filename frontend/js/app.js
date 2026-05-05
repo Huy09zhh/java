@@ -138,3 +138,68 @@ function updateCartCount() {
 document.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
 });
+
+
+function toggleCartModal() {
+    const modal = document.getElementById('cartModal');
+    if (modal.style.display === 'none') {
+        modal.style.display = 'flex';
+        renderCartItems(); 
+    } else {
+        modal.style.display = 'none';
+    }
+}
+
+function renderCartItems() {
+    const cart = getCart();
+    const container = document.getElementById('cartItemsContainer');
+    const totalPriceEl = document.getElementById('cartTotalPrice');
+
+    container.innerHTML = '';
+    let total = 0;
+
+    if (cart.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #64748b; margin-top: 20px;">Giỏ hàng của bạn đang trống.</p>';
+        totalPriceEl.innerText = '0 đ';
+        return;
+    }
+
+    cart.forEach((item, index) => {
+        total += item.price * item.quantity;
+
+        const itemHTML = `
+            <div style="display: flex; gap: 15px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+                <img src="${item.imageUrl}" alt="${item.name}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <div style="flex: 1;">
+                    <h4 style="font-size: 0.9rem; margin: 0 0 5px 0; color: #1e293b;">${item.name}</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #e63946; font-weight: bold;">${item.price.toLocaleString('vi-VN')} đ</span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 0.9rem; color: #64748b;">x ${item.quantity}</span>
+                            <button onclick="removeFromCart(${index})" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.8rem; text-decoration: underline;">Xóa</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHTML);
+    });
+
+    totalPriceEl.innerText = total.toLocaleString('vi-VN') + ' đ';
+}
+
+function removeFromCart(index) {
+    let cart = getCart();
+    cart.splice(index, 1);
+    saveCart(cart);
+    renderCartItems();
+}
+
+function goToCheckout() {
+    let cart = getCart();
+    if (cart.length === 0) {
+        alert("Giỏ hàng đang trống. Vui lòng chọn sản phẩm trước!");
+        return;
+    }
+    alert("Tính năng thanh toán sẽ được thực hiện ở các bước tiếp theo!");
+}
