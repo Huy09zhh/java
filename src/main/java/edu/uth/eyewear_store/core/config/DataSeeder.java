@@ -201,7 +201,7 @@ public class DataSeeder implements CommandLineRunner {
             }
         }
     }
-    
+
 
     // Nạp chồng buildProduct hỗ trợ galleryImagesJson
     private Product buildProduct(String name, String sku, String type, String price, String imageUrl, String tags, String detailTabsJson, String galleryImagesJson) {
