@@ -43,7 +43,10 @@ public class PaymentController {
             long amount = order.getTotalAmount().longValue();
             String code = "DONHANG" + order.getId();
             
-            String accNo = acbApiService.getAccountNumber();
+            String accNo = configRepository.findById("PAYMENT_ACB_ACCOUNT")
+                    .map(edu.uth.eyewear_store.core.entity.SystemConfig::getConfigValue)
+                    .orElse(acbApiService.getAccountNumber());
+
             String encodedCode = java.net.URLEncoder.encode(code, "UTF-8");
 
             String qrUrl = String.format("https://img.vietqr.io/image/ACB-%s-compact2.png?amount=%d&addInfo=%s",
