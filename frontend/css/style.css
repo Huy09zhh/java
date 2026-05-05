@@ -216,6 +216,64 @@ body {
     cursor: pointer;
     color: #333;
 }
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 15px 10px;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+    }
+
+    .product-grid {
+        gap: 15px;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+
+    .product-card {
+        border-radius: 8px;
+    }
+
+    .product-image {
+        height: 180px;
+    }
+
+    .product-info {
+        padding: 12px;
+    }
+
+    .product-name {
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+    }
+
+    .product-price {
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+    }
+
+    .btn-add-cart {
+        padding: 10px 10px;
+        font-size: 0.9rem;
+        border-radius: 6px;
+    }
+}
+
+
+@media screen and (max-width: 480px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-image {
+        height: 250px;
+    }
+
+    .product-name {
+        font-size: 1.1rem;
+    }
+}
 
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
