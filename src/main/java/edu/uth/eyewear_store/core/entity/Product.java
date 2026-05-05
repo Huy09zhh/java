@@ -1,4 +1,5 @@
 package edu.uth.eyewear_store.core.entity;
+
 import jakarta.persistence.*;
 import org.hibernate.annotations.Nationalized;
 import lombok.*;
@@ -26,11 +27,19 @@ public class Product {
     private BigDecimal basePrice;
 
     @Column(length = 2000)
-    private String imageUrl;
+    private String imageUrl; // Ảnh đại diện chính
 
     @Nationalized
     @Column(length = 4000)
     private String description;
+
+    @Nationalized
+    @Column(length = 6000)
+    private String detailTabsJson;
+
+    // BƯỚC C29: THÊM TRƯỜNG GALLERY ĐỂ LƯU MẢNG ẢNH
+    @Column(length = 4000)
+    private String galleryImagesJson;
 
     @Builder.Default
     @JsonProperty("available")
@@ -46,4 +55,18 @@ public class Product {
     @JsonProperty("allowPrescription")
     @Column(name = "allow_prescription")
     private Boolean allowPrescription = false;
+
+    @Builder.Default
+    @JsonProperty("showPrescriptionForm")
+    @Column(name = "show_prescription_form")
+    private Boolean showPrescriptionForm = false;
+
+    @Column(length = 2000)
+    private String tags;
+
+    @Column(length = 2000)
+    private String comboItemsJson;
+
+    @Builder.Default
+    private Integer discountPercentage = 0;
 }
