@@ -5,7 +5,8 @@ import edu.uth.eyewear_store.order.entity.OrderItem;
 import edu.uth.eyewear_store.order.entity.OrderStatus;
 import edu.uth.eyewear_store.order.entity.OrderType;
 import edu.uth.eyewear_store.order.repository.OrderRepository;
-import edu.uth.eyewear_store.operations.service.InventoryService; // Thêm thư viện gọi Service của Kho
+import edu.uth.eyewear_store.operations.service.InventoryService;
+import edu.uth.eyewear_store.core.service.AuditLogService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Service
 public class OrderService {
@@ -23,6 +25,9 @@ public class OrderService {
     @Autowired
     private InventoryService inventoryService;
 
+    @Autowired
+    private AuditLogService auditLogService;
+    
     @Transactional
     public Order createOrder(Order order) {
         if (order.getOrderType() == null) {
@@ -41,23 +46,28 @@ public class OrderService {
                 : OrderStatus.PENDING);
 
         BigDecimal calculatedTotal = BigDecimal.ZERO;
+
         for (OrderItem item : order.getOrderItems()) {
             item.setOrder(order);
-            BigDecimal itemTotal = item.getPrice().multiply(new BigDecimal(item.getQuantity()));
+
+            BigDecimal quantity = BigDecimal.valueOf(item.getQuantity());
+            BigDecimal itemTotal = item.getPrice().multiply(quantity);
+
             calculatedTotal = calculatedTotal.add(itemTotal);
         }
+
+        calculatedTotal = calculatedTotal.setScale(0, RoundingMode.HALF_UP);
+
         order.setTotalAmount(calculatedTotal);
 
         return orderRepository.save(order);
     }
 
 
-    // Hàm lấy đơn hàng theo ID
     public Order getOrderById(@NonNull Long id) {
         return orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
     }
 
-    // Hàm cập nhật trạng thái đơn và TỰ ĐỘNG TRỪ KHO
     @Transactional
     public Order updateOrderStatus(@NonNull Long id, OrderStatus newStatus) {
         Order order = getOrderById(id);
@@ -67,7 +77,6 @@ public class OrderService {
         if (newStatus == OrderStatus.SHIPPED && oldStatus != OrderStatus.SHIPPED) {
             if (order.getOrderItems() != null) {
                 for (OrderItem item : order.getOrderItems()) {
-                    // Gọi hàm reduceStock từ InventoryService của TV2
                     inventoryService.reduceStock(item.getProductId(), item.getQuantity());
                 }
             }
@@ -76,6 +85,7 @@ public class OrderService {
         order.setStatus(newStatus);
         return orderRepository.save(order);
     }
+
 
     @Transactional
     public Order requestReturn(@NonNull Long id, String reason) {
@@ -93,16 +103,15 @@ public class OrderService {
             order.setStatus(OrderStatus.RETURN_REQUESTED);
         }
 
-        // Lưu lý do của khách hàng
         order.setReturnReason(reason);
 
-        // Thêm ghi chú vào hệ thống support (Support Note) để nhân viên tiện theo dõi
+        // Thêm ghi chú vào hệ thống support
         String timestamp = java.time.LocalDateTime.now()
                 .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         String returnNote = String.format("\n[%s] Yêu cầu từ khách: %s", timestamp, reason);
         order.setSupportNote(order.getSupportNote() == null ? returnNote : order.getSupportNote() + returnNote);
 
-        // Ghi Log hệ thống (Sử dụng service do TV1 đã viết ở C27)
+        // Ghi Log hệ thống
         if (auditLogService != null) {
             auditLogService.logAction("UPDATE", "ORDER", id.toString(), "Yêu cầu đổi/trả đơn hàng: " + reason);
         }
