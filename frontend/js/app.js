@@ -1,4 +1,5 @@
 const API_BASE_URL = 'http://localhost:8081/api';
+let paymentPollingInterval = null;
 
 function formatCurrency(amount) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
@@ -38,7 +39,6 @@ async function loadProducts() {
                         displayImage = gallery[0];
                     }
                 } catch (e) {
-                    console.error(product.id);
                 }
             }
 
@@ -51,7 +51,7 @@ async function loadProducts() {
                 <div class="product-info">
                     <h3 class="product-name">${product.name}</h3>
                     <p class="product-price">${formatCurrency(product.basePrice)}</p>
-                    <button class="btn-add-cart" onclick="addToCart(${product.id}, ${product.basePrice})">Thêm Vào Giỏ</button>
+                    <button class="btn-add-cart" onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', ${product.basePrice}, '${displayImage}')">Thêm Vào Giỏ</button>
                 </div>
             `;
 
@@ -65,6 +65,7 @@ async function loadProducts() {
 
 document.addEventListener('DOMContentLoaded', () => {
     loadProducts();
+    updateCartCount();
 
     const loginModal = document.getElementById('loginModal');
     const accountBtn = document.getElementById('accountBtn');
@@ -88,10 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
-function addToCart(productId, price) {
-    alert(`Đã thêm sản phẩm ID: ${productId} vào giỏ hàng!`);
-}
 
 function getCart() {
     const cart = localStorage.getItem('tbee_shopping_cart');
@@ -135,14 +132,9 @@ function updateCartCount() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    updateCartCount();
-});
-
-
 function toggleCartModal() {
     const modal = document.getElementById('cartModal');
-    if (modal.style.display === 'none') {
+    if (modal.style.display === 'none' || modal.style.display === '') {
         modal.style.display = 'flex';
         renderCartItems(); 
     } else {
@@ -160,7 +152,7 @@ function renderCartItems() {
 
     if (cart.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #64748b; margin-top: 20px;">Giỏ hàng của bạn đang trống.</p>';
-        totalPriceEl.innerText = '0 đ';
+        if (totalPriceEl) totalPriceEl.innerText = '0 đ';
         return;
     }
 
@@ -185,7 +177,7 @@ function renderCartItems() {
         container.insertAdjacentHTML('beforeend', itemHTML);
     });
 
-    totalPriceEl.innerText = total.toLocaleString('vi-VN') + ' đ';
+    if (totalPriceEl) totalPriceEl.innerText = total.toLocaleString('vi-VN') + ' đ';
 }
 
 function removeFromCart(index) {
@@ -195,11 +187,119 @@ function removeFromCart(index) {
     renderCartItems();
 }
 
-function goToCheckout() {
+async function goToCheckout() {
     let cart = getCart();
     if (cart.length === 0) {
         alert("Giỏ hàng đang trống. Vui lòng chọn sản phẩm trước!");
         return;
     }
-    alert("Tính năng thanh toán sẽ được thực hiện ở các bước tiếp theo!");
+
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (checkoutBtn) {
+        checkoutBtn.innerText = 'Đang xử lý...';
+        checkoutBtn.disabled = true;
+    }
+
+    try {
+        const orderPayload = {
+            orderType: "AVAILABLE",
+            totalAmount: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+        };
+
+        const headers = { 'Content-Type': 'application/json' };
+        const token = localStorage.getItem('jwt_token');
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const resOrder = await fetch(`${API_BASE_URL}/orders`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(orderPayload)
+        });
+
+        if (!resOrder.ok) throw new Error('Không thể tạo đơn hàng');
+        const order = await resOrder.json();
+
+        const resQr = await fetch(`${API_BASE_URL}/payment/acb/qr/${order.id}`, { headers: headers });
+        if (!resQr.ok) {
+            const errData = await resQr.json();
+            throw new Error(errData.error || 'Hệ thống thanh toán hiện không khả dụng.');
+        }
+        const qrData = await resQr.json();
+
+        const cartModal = document.getElementById('cartModal');
+        if (cartModal) cartModal.style.display = 'none';
+
+        let paymentModal = document.getElementById('paymentModal');
+        if (!paymentModal) {
+            const modalHtml = `
+                <div id="paymentModal" style="display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center;">
+                    <div style="background:white; padding:30px; border-radius:12px; width:400px; text-align:center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+                        <h2 style="margin-bottom: 20px; color: #1e293b;">Thanh Toán Đơn Hàng</h2>
+                        <img id="qrImage" src="${qrData.qrUrl}" alt="Mã QR Thanh Toán" style="max-width:250px; margin: 0 auto 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <p style="margin-bottom: 10px; font-size: 1.1rem; color: #475569;">Số tiền: <strong id="payAmount" style="color: #e63946;">${formatCurrency(qrData.amount)}</strong></p>
+                        <p style="margin-bottom: 20px; font-size: 1.1rem; color: #475569;">Nội dung: <strong id="payContent" style="color: #2563eb;">${qrData.code}</strong></p>
+                        <div id="paymentStatus" style="margin-bottom: 20px; padding: 12px; background: #fef3c7; color: #d97706; border-radius: 6px; font-weight: bold;">
+                            🔄 Đang chờ thanh toán...
+                        </div>
+                        <button onclick="closePaymentModal()" style="width: 100%; padding: 12px; background: #64748b; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Đóng Cửa Sổ</button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            paymentModal = document.getElementById('paymentModal');
+        } else {
+            paymentModal.style.display = 'flex';
+            document.getElementById('qrImage').src = qrData.qrUrl;
+            document.getElementById('payAmount').innerText = formatCurrency(qrData.amount);
+            document.getElementById('payContent').innerText = qrData.code;
+            
+            const statusEl = document.getElementById('paymentStatus');
+            if (statusEl) {
+                statusEl.style.background = '#fef3c7';
+                statusEl.style.color = '#d97706';
+                statusEl.innerText = '🔄 Đang chờ thanh toán...';
+            }
+        }
+
+        localStorage.removeItem('tbee_shopping_cart');
+        updateCartCount();
+
+        if (paymentPollingInterval) clearInterval(paymentPollingInterval);
+        paymentPollingInterval = setInterval(() => checkPayment(order.id), 5000);
+
+    } catch (e) {
+        alert('Lỗi đặt hàng: ' + e.message);
+    } finally {
+        if (checkoutBtn) {
+            checkoutBtn.innerText = 'Tiến hành thanh toán';
+            checkoutBtn.disabled = false;
+        }
+    }
+}
+
+function closePaymentModal() {
+    const modal = document.getElementById('paymentModal');
+    if (modal) modal.style.display = 'none';
+    if (paymentPollingInterval) clearInterval(paymentPollingInterval);
+}
+
+async function checkPayment(orderId) {
+    try {
+        const headers = { 'Content-Type': 'application/json' };
+        const token = localStorage.getItem('jwt_token');
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`${API_BASE_URL}/payment/acb/check/${orderId}`, { headers: headers });
+        const data = await res.json();
+
+        if (data.paid) {
+            clearInterval(paymentPollingInterval);
+            const statusEl = document.getElementById('paymentStatus');
+            if (statusEl) {
+                statusEl.style.background = '#dcfce3';
+                statusEl.style.color = '#15803d';
+                statusEl.innerText = '✅ Thanh toán thành công! Mã đơn: ' + orderId;
+            }
+        }
+    } catch (e) {}
 }
