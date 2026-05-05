@@ -13,9 +13,10 @@ import java.util.List;
 @RequestMapping("/api/products")
 @CrossOrigin(origins = "*")
 public class ProductController {
+
     @Autowired
     private ProductService productService;
-
+    
     @GetMapping
     public List<Product> getProducts(
             @RequestParam(required = false) String keyword,
@@ -24,17 +25,33 @@ public class ProductController {
             @RequestParam(required = false) Boolean preOrder,
             @RequestParam(required = false) Boolean allowPrescription) {
 
-        // Nếu có bất kỳ tham số lọc nào được truyền lên từ Frontend
+        // Nếu có truyền lên bất kỳ tham số tìm kiếm nào
         if (keyword != null || type != null || available != null || preOrder != null || allowPrescription != null) {
             return productService.searchProducts(keyword, type, available, preOrder, allowPrescription);
         }
 
-        // Trả về toàn bộ nếu không có tham số lọc
+        // Nếu không có tham số, trả về toàn bộ
         return productService.getAllProducts();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable @NonNull Long id) {
         return ResponseEntity.ok(productService.getProductById(id));
+    }
+
+    @PostMapping
+    public Product createProduct(@RequestBody @NonNull Product product) {
+        return productService.createProduct(product);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable @NonNull Long id, @RequestBody @NonNull Product product) {
+        return ResponseEntity.ok(productService.updateProduct(id, product));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable @NonNull Long id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
     }
 }
