@@ -283,6 +283,190 @@ function closePaymentModal() {
     if (paymentPollingInterval) clearInterval(paymentPollingInterval);
 }
 
+function getCart() {
+    const cart = localStorage.getItem('tbee_shopping_cart');
+    return cart ? JSON.parse(cart) : [];
+}
+
+function saveCart(cart) {
+    localStorage.setItem('tbee_shopping_cart', JSON.stringify(cart));
+    updateCartCount();
+}
+
+function addToCart(productId, productName, price, imageUrl) {
+    let cart = getCart();
+    let existingItem = cart.find(item => item.productId === productId);
+
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({
+            productId: productId,
+            name: productName,
+            price: parseFloat(price),
+            imageUrl: imageUrl,
+            quantity: 1
+        });
+    }
+
+    saveCart(cart);
+    alert(`Đã thêm "${productName}" vào giỏ hàng thành công!`);
+}
+
+function updateCartCount() {
+    const cart = getCart();
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const cartBadge = document.getElementById('cart-badge');
+    if (cartBadge) {
+        cartBadge.innerText = totalItems;
+        cartBadge.style.display = totalItems > 0 ? 'inline-block' : 'none';
+    }
+}
+
+// --- 2. GIAO DIỆN GIỎ HÀNG (C16) ---
+function toggleCartModal() {
+    const modal = document.getElementById('cartModal');
+    if (modal.style.display === 'none' || modal.style.display === '') {
+        modal.style.display = 'flex';
+        renderCartItems();
+    } else {
+        modal.style.display = 'none';
+    }
+}
+
+function renderCartItems() {
+    const cart = getCart();
+    const container = document.getElementById('cartItemsContainer');
+    const totalPriceEl = document.getElementById('cartTotalPrice');
+
+    container.innerHTML = '';
+    let total = 0;
+
+    if (cart.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #64748b; margin-top: 20px;">Giỏ hàng của bạn đang trống.</p>';
+        totalPriceEl.innerText = '0 đ';
+        return;
+    }
+
+    cart.forEach((item, index) => {
+        total += item.price * item.quantity;
+        const itemHTML = `
+            <div style="display: flex; gap: 15px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+                <img src="${item.imageUrl}" alt="${item.name}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <div style="flex: 1;">
+                    <h4 style="font-size: 0.9rem; margin: 0 0 5px 0; color: #1e293b;">${item.name}</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #e63946; font-weight: bold;">${item.price.toLocaleString('vi-VN')} đ</span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 0.9rem; color: #64748b;">x ${item.quantity}</span>
+                            <button onclick="removeFromCart(${index})" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.8rem; text-decoration: underline;">Xóa</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHTML);
+    });
+
+    totalPriceEl.innerText = total.toLocaleString('vi-VN') + ' đ';
+}
+
+function removeFromCart(index) {
+    let cart = getCart();
+    cart.splice(index, 1);
+    saveCart(cart);
+    renderCartItems();
+}
+
+function goToCheckout() {
+    let cart = getCart();
+    if (cart.length === 0) {
+        alert("Giỏ hàng đang trống. Vui lòng chọn sản phẩm trước!");
+        return;
+    }
+    alert("Chuyển hướng thanh toán (Tính năng sẽ tích hợp ở C24)!");
+}
+
+// --- 3. LỊCH SỬ ĐƠN HÀNG & CHI TIẾT (C45) ---
+async function loadUserOrders() {
+    const userId = localStorage.getItem('userId') || 1; // Tạm fix cứng ID 1 nếu TV1 chưa làm xong login lưu userId
+
+    try {
+        const response = await fetch(`http://localhost:8081/api/orders/user/${userId}`);
+        if (!response.ok) throw new Error("Không thể lấy danh sách đơn hàng");
+        const orders = await response.json();
+
+        const tbody = document.getElementById('userOrderHistoryTable');
+        tbody.innerHTML = '';
+
+        if (orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color: #64748b;">Bạn chưa có đơn hàng nào.</td></tr>';
+        } else {
+            orders.forEach(order => {
+                let statusColor = '#f59e0b';
+                if (order.status === 'COMPLETED' || order.status === 'DELIVERED') statusColor = '#10b981';
+                if (order.status === 'CANCELLED' || order.status === 'REFUNDED') statusColor = '#ef4444';
+
+                const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleDateString('vi-VN') : 'N/A';
+
+                tbody.innerHTML += `
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 15px 10px; font-weight: 500;">#ORD-${order.id}</td>
+                        <td style="padding: 15px 10px; color: #64748b;">${dateStr}</td>
+                        <td style="padding: 15px 10px; color: #e63946; font-weight: bold;">${order.totalAmount.toLocaleString('vi-VN')} đ</td>
+                        <td style="padding: 15px 10px; color: ${statusColor}; font-weight: 600;">${order.status}</td>
+                        <td style="padding: 15px 10px;">
+                            <button onclick="viewOrderDetails(${order.id})" style="padding: 6px 12px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">
+                                Xem chi tiết
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('orderHistoryModal').style.display = 'flex';
+    } catch (error) {
+        console.error("Lỗi tải đơn hàng:", error);
+        alert("Có lỗi xảy ra khi tải lịch sử đơn hàng!");
+    }
+}
+
+async function viewOrderDetails(orderId) {
+    try {
+        const response = await fetch(`http://localhost:8081/api/orders/${orderId}`);
+        if (!response.ok) throw new Error("Không thể tải chi tiết");
+        const order = await response.json();
+
+        document.getElementById('detailOrderId').innerText = order.id;
+        document.getElementById('detailOrderTotal').innerText = order.totalAmount.toLocaleString('vi-VN') + ' đ';
+
+        const itemsContainer = document.getElementById('detailOrderItems');
+        itemsContainer.innerHTML = '';
+
+        order.orderItems.forEach(item => {
+            itemsContainer.innerHTML += `
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding: 12px 0;">
+                    <div style="color: #334155;">
+                        <span style="font-weight: 600;">Sản phẩm ID: ${item.productId}</span>
+                        <span style="color: #64748b; font-size: 0.9rem; margin-left: 5px;">(Số lượng: ${item.quantity})</span>
+                    </div>
+                    <strong style="color: #1e293b;">${item.price.toLocaleString('vi-VN')} đ</strong>
+                </div>
+            `;
+        });
+
+        document.getElementById('customerOrderDetailModal').style.display = 'flex';
+    } catch (error) {
+        console.error("Lỗi xem chi tiết:", error);
+        alert("Không thể tải chi tiết đơn hàng này!");
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateCartCount();
+});
+
 async function checkPayment(orderId) {
     try {
         const headers = { 'Content-Type': 'application/json' };
