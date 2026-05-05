@@ -135,6 +135,86 @@ public class DataSeeder implements CommandLineRunner {
                 System.out.println("====== ĐÃ NẠP KHO (100) CHO 5 SẢN PHẨM ======");
             }
         }
+
+        if (orderRepository.count() == 0) {
+            // Lấy tài khoản khách hàng mẫu ("customer")
+            User customer = userRepository.findByUsername("customer").orElse(null);
+            // Lấy danh sách sản phẩm hiện có
+            List<Product> allProducts = productRepository.findAll();
+
+            if (customer != null && allProducts.size() >= 4) {
+                // KỊCH BẢN 1: Đơn mua ngay (AVAILABLE) - Trạng thái PENDING
+                Product p1 = allProducts.get(0);
+                Order order1 = Order.builder()
+                        .userId(customer.getId())
+                        .totalAmount(p1.getBasePrice().multiply(new BigDecimal("1")))
+                        .status(OrderStatus.PENDING)
+                        .orderType(OrderType.AVAILABLE)
+                        .shippingAddress("123 Đường ABC, TP.HCM")
+                        .build();
+                OrderItem item1 = new OrderItem();
+                item1.setOrder(order1);
+                item1.setProductId(p1.getId());
+                item1.setQuantity(1);
+                item1.setPrice(p1.getBasePrice());
+                order1.setOrderItems(List.of(item1));
+                orderRepository.save(order1);
+
+                // KỊCH BẢN 2: Đơn đặt trước (PRE_ORDER) - Trạng thái PENDING
+                Product p2 = allProducts.get(1);
+                Order order2 = Order.builder()
+                        .userId(customer.getId())
+                        .totalAmount(p2.getBasePrice().multiply(new BigDecimal("2"))) // Mua 2 cái
+                        .status(OrderStatus.PENDING)
+                        .orderType(OrderType.PRE_ORDER)
+                        .shippingAddress("456 Đường XYZ, Hà Nội")
+                        .build();
+                OrderItem item2 = new OrderItem();
+                item2.setOrder(order2);
+                item2.setProductId(p2.getId());
+                item2.setQuantity(2);
+                item2.setPrice(p2.getBasePrice());
+                order2.setOrderItems(List.of(item2));
+                orderRepository.save(order2);
+
+                // KỊCH BẢN 3: Đơn hàng cắt kính (PRESCRIPTION) - Trạng thái PRESCRIPTION_REVIEW
+                Product p3 = allProducts.get(2);
+                Order order3 = Order.builder()
+                        .userId(customer.getId())
+                        .totalAmount(p3.getBasePrice().multiply(new BigDecimal("1")))
+                        .status(OrderStatus.PRESCRIPTION_REVIEW)
+                        .orderType(OrderType.PRESCRIPTION)
+                        .prescriptionDetails("Mắt trái: -2.00, Mắt phải: -1.50")
+                        .shippingAddress("123 Đường ABC, TP.HCM")
+                        .build();
+                OrderItem item3 = new OrderItem();
+                item3.setOrder(order3);
+                item3.setProductId(p3.getId());
+                item3.setQuantity(1);
+                item3.setPrice(p3.getBasePrice());
+                order3.setOrderItems(List.of(item3));
+                orderRepository.save(order3);
+
+                // KỊCH BẢN 4: Đơn đã giao thành công (DELIVERED) - Dùng để test Doanh thu cho TV4
+                Product p4 = allProducts.get(3);
+                Order order4 = Order.builder()
+                        .userId(customer.getId())
+                        .totalAmount(p4.getBasePrice().multiply(new BigDecimal("1")))
+                        .status(OrderStatus.DELIVERED)
+                        .orderType(OrderType.AVAILABLE)
+                        .shippingAddress("789 Đường LMN, Đà Nẵng")
+                        .build();
+                OrderItem item4 = new OrderItem();
+                item4.setOrder(order4);
+                item4.setProductId(p4.getId());
+                item4.setQuantity(1);
+                item4.setPrice(p4.getBasePrice());
+                order4.setOrderItems(List.of(item4));
+                orderRepository.save(order4);
+
+                System.out.println("====== ĐÃ TẠO THÀNH CÔNG 4 ĐƠN HÀNG TEST CHO SALES & OPS ======");
+            }
+        }
     }
 
     private Product buildProduct(String name, String sku, String type, String price, String imageUrl, String tags) {
@@ -151,4 +231,5 @@ public class DataSeeder implements CommandLineRunner {
                 .allowPrescription("LENS".equalsIgnoreCase(type))
                 .build();
     }
+
 }
