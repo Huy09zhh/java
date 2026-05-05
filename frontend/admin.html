@@ -3,35 +3,152 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TBEE Admin Portal</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>TBEE Admin Portal | ERP System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg: #f1f5f9;
+            --sidebar: #1e293b;
+            --accent: #2563eb;
+            --text: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar);
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            padding: 20px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo span {
+            color: #60a5fa;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: #60a5fa;
+        }
+
+        .main {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+    </style>
 </head>
 
 <body>
-    <header class="site-header">
-        <div class="container">
-            <div class="brand">TBEE Admin</div>
-            <nav class="site-nav">
-                <a href="#">Dashboard</a>
-                <a href="#">Báo cáo</a>
-                <a href="#">Cài đặt</a>
-            </nav>
-        </div>
-    </header>
+    <div class="sidebar">
+        <div class="logo">TBEE <span>ERP</span></div>
+        <div class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard')">📊 Dashboard</div>
+        <div class="nav-item" id="nav-sales" onclick="switchTab('sales')">🎧 Sales / Support</div>
+        <div class="nav-item" id="nav-ops" onclick="switchTab('ops')">📋 Đơn hàng & Vận hành</div>
+        <div class="nav-item" id="nav-inventory" onclick="switchTab('inventory')">📦 Quản lý Kho</div>
+        <div class="nav-item" id="nav-users" onclick="switchTab('users')">👥 Quản lý Tài khoản</div>
+        <div class="nav-item" id="nav-manager" onclick="switchTab('manager')">📈 Manager Portal</div>
+        <div class="nav-item" id="nav-policies" onclick="switchTab('policies')">📜 Khuyến mãi & Chính sách</div>
+        <div class="nav-item" id="nav-sysadmin" onclick="switchTab('sysadmin')">⚙️ System Admin</div>
+        <div class="nav-item" onclick="logout()"
+            style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); color: #f87171;">Đăng xuất</div>
+    </div>
 
-    <main class="page-content">
-        <div class="container">
-            <h1>Admin Portal</h1>
-            <p></p>
+    <div class="main">
+        <div class="header">
+            <h1 id="pageTitle">Dashboard</h1>
+            <div class="user-info" id="userInfoText">Xin chào, Admin</div>
         </div>
-    </main>
 
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 TBEE Admin. Bảo lưu mọi quyền.</p>
-        </div>
-    </footer>
+        <div id="dashboard" class="section active"></div>
+        <div id="sales" class="section"></div>
+        <div id="ops" class="section"></div>
+        <div id="inventory" class="section"></div>
+        <div id="users" class="section"></div>
+        <div id="manager" class="section"></div>
+        <div id="policies" class="section"></div>
+        <div id="sysadmin" class="section"></div>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            const section = document.getElementById(tabId);
+            const nav = document.getElementById(`nav-${tabId}`);
+
+            if (section) section.classList.add('active');
+            if (nav) nav.classList.add('active');
+
+            const titles = {
+                'dashboard': 'Dashboard', 'sales': 'Sales Portal',
+                'ops': 'Operations', 'inventory': 'Quản lý Kho',
+                'users': 'Quản lý Tài khoản', 'manager': 'Manager Portal',
+                'policies': 'Quản lý Chính sách', 'sysadmin': 'System Admin'
+            };
+            document.getElementById('pageTitle').innerText = titles[tabId] || 'Admin';
+        }
+
+        function logout() {
+            localStorage.removeItem('jwt_token');
+            window.location.href = 'index.html';
+        }
+    </script>
 </body>
 
 </html>
