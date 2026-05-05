@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chính sách cửa hàng | TBEE Eyewear</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        header {
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header a {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        header a:hover {
+            text-decoration: underline;
+        }
+        .policy-container {
+            display: flex;
+            max-width: 1000px;
+            margin: 40px auto;
+            gap: 30px;
+            padding: 0 20px;
+        }
+        .policy-sidebar {
+            width: 280px;
+            flex-shrink: 0;
+        }
+        .policy-sidebar-item {
+            padding: 15px 20px;
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #475569;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        .policy-sidebar-item:hover {
+            background: #e2e8f0;
+        }
+        .policy-sidebar-item.active {
+            background: #2563eb;
+            color: white;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+        }
+        .policy-content {
+            flex: 1;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            min-height: 400px;
+        }
+        .policy-title {
+            font-size: 2rem;
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #0f172a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 15px;
+        }
+        .policy-body {
+            line-height: 1.8;
+            font-size: 1.05rem;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h2 style="margin: 0;">Chính sách Khách hàng</h2>
+    <a href="index.html">&larr; Về trang chủ mua sắm</a>
+</header>
+
+<div class="policy-container">
+    <div class="policy-sidebar" id="policySidebar">
+        <p style="padding: 20px; color: #64748b;">Đang tải dữ liệu...</p>
+    </div>
+
+    <div class="policy-content" id="policyContentWrapper" style="display: none;">
+        <h1 class="policy-title" id="policyTitle">Tiêu đề</h1>
+        <div class="policy-body" id="policyBody">Nội dung...</div>
+    </div>
+</div>
+
+<script>
+    // Gọi API GET /api/policies mà bạn đã tạo ở C31
+    async function loadPolicies() {
+        try {
+            const response = await fetch('http://localhost:8081/api/policies');
+            if (!response.ok) throw new Error("Lỗi mạng: Không thể kết nối tới server");
+
+            const policies = await response.json();
+            const sidebar = document.getElementById('policySidebar');
+            sidebar.innerHTML = ''; // Xóa chữ "Đang tải dữ liệu..."
+
+            if (!policies || policies.length === 0) {
+                sidebar.innerHTML = '<p style="color: #64748b;">Hệ thống chưa cập nhật chính sách nào.</p>';
+                return;
+            }
+
+            // Lọc ra các chính sách có cờ active = true
+            const activePolicies = policies.filter(p => p.active);
+
+            if (activePolicies.length === 0) {
+                sidebar.innerHTML = '<p style="color: #64748b;">Chưa có chính sách nào đang được áp dụng.</p>';
+                return;
+            }
+
+            // Render danh sách menu bên trái
+            activePolicies.forEach((policy, index) => {
+                const item = document.createElement('div');
+                item.className = 'policy-sidebar-item';
+                item.innerText = policy.title;
+
+                // Thêm sự kiện click để hiển thị nội dung tương ứng
+                item.onclick = () => renderPolicyDetail(policy, item);
+
+                sidebar.appendChild(item);
+
+                // Mặc định tự động bấm (hiển thị) chính sách đầu tiên trong danh sách
+                if (index === 0) {
+                    renderPolicyDetail(policy, item);
+                }
+            });
+
+        } catch (error) {
+            console.error('Lỗi khi fetch policies:', error);
+            document.getElementById('policySidebar').innerHTML = '<p style="color: #ef4444;">Không thể tải dữ liệu từ máy chủ. Vui lòng kiểm tra lại Backend.</p>';
+        }
+    }
+
+    // Hàm hiển thị nội dung của 1 chính sách cụ thể sang cột bên phải
+    function renderPolicyDetail(policy, clickedItem) {
+        // Xóa class 'active' ở tất cả các thẻ menu
+        document.querySelectorAll('.policy-sidebar-item').forEach(el => {
+            el.classList.remove('active');
+        });
+        // Thêm class 'active' (đổi màu) cho thẻ vừa được click
+        if (clickedItem) {
+            clickedItem.classList.add('active');
+        }
+
+        // Đẩy dữ liệu vào HTML
+        document.getElementById('policyContentWrapper').style.display = 'block';
+        document.getElementById('policyTitle').innerText = policy.title;
+        document.getElementById('policyBody').innerText = policy.content;
+    }
+
+    // Tự động chạy hàm loadPolicies khi trang web vừa tải xong
+    document.addEventListener('DOMContentLoaded', loadPolicies);
+</script>
+</body>
+</html>
