@@ -1,8 +1,8 @@
 const API_BASE_URL = 'http://localhost:8081/api';
+let paymentPollingInterval; 
 
 function formatCurrency(amount) {
     if (amount === null || amount === undefined) return '0 đ';
-    // Sử dụng toLocaleString để tạo dấu chấm phân cách hàng nghìn và nối thêm đuôi 'đ'
     return Number(amount).toLocaleString('vi-VN') + ' đ';
 }
 
@@ -56,7 +56,6 @@ async function loadProducts() {
         productGrid.innerHTML = '<p style="text-align: center; color: red; grid-column: 1 / -1;">Lỗi kết nối máy chủ. Vui lòng thử lại sau.</p>';
     }
 }
-
 
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
@@ -150,7 +149,6 @@ document.addEventListener('click', (event) => {
     }
 });
 
-
 async function checkout() {
     if (cart.length === 0) {
         alert("Giỏ hàng đang trống, vui lòng chọn sản phẩm trước khi thanh toán!");
@@ -216,7 +214,116 @@ async function checkout() {
     }
 }
 
+
+function closePaymentModal() {
+    const modal = document.getElementById('paymentModal');
+    if (modal) modal.style.display = 'none';
+    if (paymentPollingInterval) clearInterval(paymentPollingInterval);
+}
+
+async function loadUserOrders() {
+    const userId = localStorage.getItem('userId') || 1; 
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/orders/user/${userId}`);
+        if (!response.ok) throw new Error("Không thể lấy danh sách đơn hàng");
+        const orders = await response.json();
+
+        const tbody = document.getElementById('userOrderHistoryTable');
+        if(!tbody) return;
+        tbody.innerHTML = '';
+
+        if (orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color: #64748b;">Bạn chưa có đơn hàng nào.</td></tr>';
+        } else {
+            orders.forEach(order => {
+                let statusColor = '#f59e0b';
+                if (order.status === 'COMPLETED' || order.status === 'DELIVERED') statusColor = '#10b981';
+                if (order.status === 'CANCELLED' || order.status === 'REFUNDED') statusColor = '#ef4444';
+
+                const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleDateString('vi-VN') : 'N/A';
+
+                tbody.innerHTML += `
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding: 15px 10px; font-weight: 500;">#ORD-${order.id}</td>
+                        <td style="padding: 15px 10px; color: #64748b;">${dateStr}</td>
+                        <td style="padding: 15px 10px; color: #e63946; font-weight: bold;">${order.totalAmount.toLocaleString('vi-VN')} đ</td>
+                        <td style="padding: 15px 10px; color: ${statusColor}; font-weight: 600;">${order.status}</td>
+                        <td style="padding: 15px 10px;">
+                            <button onclick="viewOrderDetails(${order.id})" style="padding: 6px 12px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500;">
+                                Xem chi tiết
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        const modal = document.getElementById('orderHistoryModal');
+        if (modal) modal.style.display = 'flex';
+    } catch (error) {
+        console.error("Lỗi tải đơn hàng:", error);
+        alert("Có lỗi xảy ra khi tải lịch sử đơn hàng!");
+    }
+}
+
+async function viewOrderDetails(orderId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/orders/${orderId}`);
+        if (!response.ok) throw new Error("Không thể tải chi tiết");
+        const order = await response.json();
+
+        const detailIdEl = document.getElementById('detailOrderId');
+        const detailTotalEl = document.getElementById('detailOrderTotal');
+        const itemsContainer = document.getElementById('detailOrderItems');
+
+        if (detailIdEl) detailIdEl.innerText = order.id;
+        if (detailTotalEl) detailTotalEl.innerText = order.totalAmount.toLocaleString('vi-VN') + ' đ';
+        if (itemsContainer) {
+            itemsContainer.innerHTML = '';
+            order.orderItems.forEach(item => {
+                itemsContainer.innerHTML += `
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding: 12px 0;">
+                        <div style="color: #334155;">
+                            <span style="font-weight: 600;">Sản phẩm ID: ${item.productId}</span>
+                            <span style="color: #64748b; font-size: 0.9rem; margin-left: 5px;">(Số lượng: ${item.quantity})</span>
+                        </div>
+                        <strong style="color: #1e293b;">${item.price.toLocaleString('vi-VN')} đ</strong>
+                    </div>
+                `;
+            });
+        }
+
+        const modal = document.getElementById('customerOrderDetailModal');
+        if (modal) modal.style.display = 'flex';
+    } catch (error) {
+        console.error("Lỗi xem chi tiết:", error);
+        alert("Không thể tải chi tiết đơn hàng này!");
+    }
+}
+
+async function checkPayment(orderId) {
+    try {
+        const headers = { 'Content-Type': 'application/json' };
+        const token = localStorage.getItem('jwt_token');
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`${API_BASE_URL}/payment/acb/check/${orderId}`, { headers: headers });
+        const data = await res.json();
+
+        if (data.paid) {
+            clearInterval(paymentPollingInterval);
+            const statusEl = document.getElementById('paymentStatus');
+            if (statusEl) {
+                statusEl.style.background = '#dcfce3';
+                statusEl.style.color = '#15803d';
+                statusEl.innerText = '✅ Thanh toán thành công! Mã đơn: ' + orderId;
+            }
+        }
+    } catch (e) {}
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     loadProducts();
-    renderCart();
+    renderCart(); // renderCart đã bao gồm update luôn cart count ở trên (id="cart-count")
 });
