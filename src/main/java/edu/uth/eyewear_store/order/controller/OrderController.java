@@ -34,4 +34,11 @@ public class OrderController {
         }
         return orderService.getAllOrders();
     }
+
+    @PostMapping("/{id}/return")
+    public ResponseEntity<Order> requestReturn(
+            @PathVariable @NonNull Long id,
+            @RequestBody String reason) {
+        return ResponseEntity.ok(orderService.requestReturn(id, reason));
+    }
 }

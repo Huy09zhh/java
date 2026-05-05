@@ -76,4 +76,37 @@ public class OrderService {
         order.setStatus(newStatus);
         return orderRepository.save(order);
     }
+
+    @Transactional
+    public Order requestReturn(@NonNull Long id, String reason) {
+        Order order = getOrderById(id);
+
+        // Chỉ cho phép đổi trả khi đơn đã giao (DELIVERED) hoặc hoàn thành (COMPLETED)
+        if (order.getStatus() != OrderStatus.DELIVERED && order.getStatus() != OrderStatus.COMPLETED) {
+            throw new RuntimeException("Đơn hàng chưa giao thành công, không thể đổi trả.");
+        }
+
+        // Kiểm tra từ khóa trong lý do để phân loại là BẢO HÀNH hay ĐỔI TRẢ bình thường
+        if (reason != null && reason.toUpperCase().contains("BẢO HÀNH")) {
+            order.setStatus(OrderStatus.WARRANTY_REQUESTED);
+        } else {
+            order.setStatus(OrderStatus.RETURN_REQUESTED);
+        }
+
+        // Lưu lý do của khách hàng
+        order.setReturnReason(reason);
+
+        // Thêm ghi chú vào hệ thống support (Support Note) để nhân viên tiện theo dõi
+        String timestamp = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        String returnNote = String.format("\n[%s] Yêu cầu từ khách: %s", timestamp, reason);
+        order.setSupportNote(order.getSupportNote() == null ? returnNote : order.getSupportNote() + returnNote);
+
+        // Ghi Log hệ thống (Sử dụng service do TV1 đã viết ở C27)
+        if (auditLogService != null) {
+            auditLogService.logAction("UPDATE", "ORDER", id.toString(), "Yêu cầu đổi/trả đơn hàng: " + reason);
+        }
+
+        return orderRepository.save(order);
+    }
 }
